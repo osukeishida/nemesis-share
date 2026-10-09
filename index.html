@@ -387,6 +387,13 @@ details.zk.chz{border-left:6px solid var(--chc)}
 .lob button small{display:block;font-weight:400;font-size:11.5px;color:var(--muted)}
 .lob button[data-lo=go]{border-color:#2e9d5b;background:#2e9d5b;color:#fff}.lob button[data-lo=go] small{color:#e6fff0}
 .lob button.sm{font-size:12.5px;padding:5px 10px}
+.wgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}
+.wgrid button{font:inherit;text-align:left;padding:8px 10px;border-radius:9px;border:1.5px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+.wgrid button b{display:block;font-size:14px}.wgrid button small{display:block;font-size:11.5px;color:var(--muted);line-height:1.4;margin-top:2px}
+.wgrid button[aria-pressed=true]{border-color:#d63a35;background:color-mix(in srgb,#d63a35 14%,var(--surface))}
+.wgrid button[aria-pressed=true] b::before{content:"🩸 "}
+.gearbox .gw{border-left-color:#d63a35!important}.gearbox .gw .gt{color:#ff6b5e!important;opacity:1!important}
+.wbad{color:#ff6b5e}
 </style>
 </head>
 <body>
@@ -496,7 +503,7 @@ function gauge(){
   t.push(`<button class="tk auto${S.auto?'':' off'}" id="tkA">${ICONS["自爆トークン"]?`<img class="ico big" src="${ICONS["自爆トークン"]}" alt="">`:`<span class="dot">爆</span>`}自爆 <b>${S.auto?(S.auto>14?'終了時':'R'+S.auto):'未起動'}</b></button>`);
   t.push(`<button class="tk" id="tkAA">${ICONS["対空防御：停止"]?`<img class="ico big wide" src="${ICONS[S.aa==="稼働"?"対空防御：稼働":"対空防御：停止"]}" alt="">`:`<span class="dot">対</span>`}対空防御 <b>${S.aa}</b></button>`);
   if(S.race==='neo') t.push(`<button class="tk" id="tkB"><span class="dot">体</span>死体 <b>${S.bodies.length?S.bodies.map(b=>'R'+b).join('・'):'なし'}</b></button>`);
-  t.push(`<button class="tk${(S.gear||[]).length||S.char?'':' off'}" id="tkG" title="自分の装備を登録"><span class="dot" ${S.char?`style="background:${chCol(S.char)}"`:''}>🎒</span>${S.char?esc(chName(S.char)):'装備'} <b>${(S.gear||[]).length}</b></button>`);
+  t.push(`<button class="tk${(S.gear||[]).length||S.char||(S.wounds||[]).length?'':' off'}" id="tkG" title="自分の装備を登録"><span class="dot" ${S.char?`style="background:${chCol(S.char)}"`:''}>🎒</span>${S.char?esc(chName(S.char)):'装備'} <b>${(S.gear||[]).length}</b>${(S.wounds||[]).length?` <b class="wbad">🩸${S.wounds.length}</b>`:''}</button>`);
   t.push(`<button class="tk ng" id="tkN" title="新しいゲームを始める（全部初期化）">⟲ 新しいゲーム</button>`);
   t.unshift(`<button class="tk em-tk" id="tkE" title="敵の出現・移動・行動のメモ"><span class="dot">👾</span>敵の動き</button>`);
   $('#gTokens').innerHTML=t.join('');$('#tkN').onclick=()=>edit('N');$('#tkG').onclick=()=>edit('G');$('#tkE').onclick=()=>edit('E');
@@ -550,7 +557,9 @@ function renderEditor(){
     <h3 style="margin:10px 0 4px">🎒 自分の装備</h3><p class="note">持っている支援装備・キャラクターアイテム・アイテムを登録すると、「ラウンド進行」の今のステップに「使い忘れ注意」として表示されます（手番中・攻撃されるとき・イベントのとき）。</p>
     <div class="glist">${G.length?G.map(c=>`<div class="grow"><div><b>${esc(c.ja)}</b> <small>${esc(c.c)}</small><div class="gtg">${gtags(c).map(t=>`<span>${GLBL[t]}</span>`).join('')}</div></div><button class="ib" data-a="g-:${esc(c.c+'|'+c.en)}" aria-label="外す">×</button></div>`).join(''):'<p class="note">まだ何も登録されていません。</p>'}</div>
     <input class="search" id="gQ" type="search" placeholder="装備を追加：名前で検索（例：ライフル、アーマー、医療）" style="margin-top:8px"><div id="gRes" class="glist"></div>
-    ${G.length?'<button class="btn" data-a="g:clear">装備をすべて外す</button>':''}`;
+    ${G.length?'<button class="btn" data-a="g:clear">装備をすべて外す</button>':''}
+    <h3 style="margin:14px 0 4px">🩸 自分の重傷</h3><p class="note">受けた重傷カードをタップで登録（もう一度タップで外す＝包帯などで治したとき）。関係するステップで「使い忘れ注意」に表示します。同じ重傷を2枚受けても効果は重なりません。</p>
+    <div class="wgrid">${CARDS.filter(c=>c.c==='重傷').map(c=>`<button data-a="w:${c.en}" aria-pressed="${(S.wounds||[]).includes(c.en)}"><b>${esc(c.ja)}</b><small>${esc(WSHORT[c.en]||'')}</small></button>`).join('')}</div>`;
   }else if(editing==='E'){
     h=enemyMemo();
   }else if(editing==='N'){
@@ -580,10 +589,11 @@ function act(a){
   if(a==='bd:reset')S.bodies=[8,11,14];
   if(a.startsWith('g-:'))S.gear=(S.gear||[]).filter(k=>k!==a.slice(3));
   if(a==='g:clear')S.gear=[];
+  if(a.startsWith('w:')){const w=a.slice(2);S.wounds=(S.wounds||[]).includes(w)?S.wounds.filter(x=>x!==w):[...(S.wounds||[]),w];mark()}
   if(a.startsWith('g'))mark();
   if(a==='lp:reset')S.lander={pos:10,st:'track'};
   if(a==='ng:gauge'||a==='ng:go'){S.round=1;S.step=0;S.lander={pos:10,st:'track'};S.auto=null;S.aa='不明';S.bodies=[8,11,14];S.alert='';S.ended=null;editing=null}
-  if(a==='ng:go'){S.checks={};S.gear=[];S.char='';S.insStory=null;S.insCard=null;S.insHist=[];save();renderSetup();renderFlow();renderInsider();gauge();renderEditor();showTab('setup');return}
+  if(a==='ng:go'){S.checks={};S.gear=[];S.wounds=[];S.char='';S.insStory=null;S.insCard=null;S.insHist=[];save();renderSetup();renderFlow();renderInsider();gauge();renderEditor();showTab('setup');return}
   if(a==='ng:gauge'){save();renderFlow();gauge();renderEditor();return}
   if(a==='close')editing=null;
   save();gauge();renderEditor();
@@ -930,7 +940,7 @@ const GTAG={"AMMO":"pickup act","GRENADE":"pickup act","MEDPACK":"pickup act","O
 "OLD MILITARY ARMOR":"attacked","ASSAULT SHOTGUN":"attacked","BAYONET":"attacked","TACTICAL ARMOR":"attacked",
 "BIOHAZARD ARMOR":"infect","PERIMETER SECURITY DEVICE":"discover","MOTION SCANNER":"noise","NBC SUIT":"pass","BLOODY CAMOUFLAGE":"enter",
 "WHEELCHAIR WITH HOLO COMPUTER":"act always","UTILITY VEST":"always"};
-const GLBL={act:'手番のアクション（アイテムの使用）で使える',pickup:'拾った直後ならコストなしで使える',shoot:'射撃するときに効く',burst:'掃射するときに効く',melee:'近接攻撃するときに効く',attacked:'イントルーダーに攻撃されるときに効く',wound:'重傷を負うときに効く',infect:'感染カードを受け取るときに効く',discover:'新しい部屋を発見するときに効く',noise:'騒音ロールのときに効く',pass:'パスするときに効く',enter:'イントルーダーが部屋に入って攻撃してくるときに効く',always:'持っているだけで効く'};
+const GLBL={draw:'アクションカードを引くときに効く',act:'手番のアクション（アイテムの使用）で使える',pickup:'拾った直後ならコストなしで使える',shoot:'射撃するときに効く',burst:'掃射するときに効く',melee:'近接攻撃するときに効く',attacked:'イントルーダーに攻撃されるときに効く',wound:'重傷を負うときに効く',infect:'感染カードを受け取るときに効く',discover:'新しい部屋を発見するときに効く',noise:'騒音ロールのときに効く',pass:'パスするときに効く',enter:'イントルーダーが部屋に入って攻撃してくるときに効く',always:'持っているだけで効く'};
 const GCATS=['支援装備','キャラクターアイテム','アイテム'];
 const GCARDS=CARDS.filter(c=>GCATS.includes(c.c));
 function gtags(c){return (GTAG[c.en]||'act').split(' ')}
@@ -947,14 +957,20 @@ function stepTags(s){
   if(/イベントカードの解決/.test(s.t))return ['enter','attacked','wound','infect','noise'];
   if(/バッグの発展/.test(s.t))return ['enter','attacked','wound','infect'];
   if(/着陸機の離陸/.test(s.t))return [];
+  if(/アクションカードを引く/.test(s.t))return ['draw'];
   return [];
 }
 function charCards(){if(!S.char)return [];return CARDS.filter(c=>c.c==='アクション'&&c.s===S.char)}
 function isReact(c){return c.e.some(([k])=>k==='リアクション')}
+const WTAG={EYES:'shoot',LUNGS:'pass',HAND:'act',ARM:'act pickup',LEG:'act',BODY:'draw',KNEE:'act',GUTS:'pass',BLEEDING:'pass'};
+const WSHORT={EYES:'射撃の結果すべてに+1',LUNGS:'パスするたびに酸素1を失う（0なら代わりにHP2）',HAND:'「アイテムを使用」のコストが+1枚',ARM:'ハンドスロットが1つだけ',LEG:'イントルーダーのいる部屋からの「移動」が+1枚',BODY:'手札は5枚ではなく4枚まで引く',KNEE:'「慎重な移動」のコストが+1枚',GUTS:'パスするたびに感染カード1枚',BLEEDING:'パスするたびにHP1を失う'};
+function woundList(){return (S.wounds||[]).map(en=>CARDS.find(c=>c.c==='重傷'&&c.en===en)).filter(Boolean)}
 function gearBox(tags){
-  const G=gearList();const CC=charCards();if((!G.length&&!CC.length)||!tags.length)return '';
+  const G=gearList();const CC=charCards();const W=woundList();if((!G.length&&!CC.length&&!W.length)||!tags.length)return '';
   const order=['attacked','wound','infect','enter','shoot','burst','melee','discover','noise','pass','pickup','act','always'].filter(t=>tags.includes(t)||t==='always');
   let h='';
+  const WL=W.filter(c=>WTAG[c.en].split(' ').some(t=>tags.includes(t)));
+  if(WL.length)h+=`<div class="gg gw"><span class="gt">🩸 重傷の影響（忘れずに適用）</span>${WL.map(c=>`<div class="gi"><b>${esc(c.ja)}</b> ${esc(WSHORT[c.en])}</div>`).join('')}</div>`;
   order.forEach(t=>{const L=G.filter(c=>gtags(c).includes(t));if(!L.length)return;
     h+=`<div class="gg"><span class="gt">${GLBL[t]}</span>${L.map(c=>`<div class="gi"><b>${esc(c.ja)}</b> ${ic(gearOne(c))}</div>`).join('')}</div>`});
   if(CC.length){
