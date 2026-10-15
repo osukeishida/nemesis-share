@@ -1,0 +1,670 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<style>[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}</style>
+<script>
+/* 共有期限：2026-10-16 18:00（日本時間）。過ぎたら中身を隠して終了表示にする予備の仕組み。本体は期限後に別ページへ差し替え */
+(function(){var exp=new Date("2026-10-16T18:00:00+09:00").getTime();if(Date.now()<=exp)return;
+document.documentElement.classList.add("expired");document.title="共有は終了しました";
+document.addEventListener("DOMContentLoaded",function(){document.body.innerHTML='<main class="exp"><div><small>ACCESS EXPIRED</small><h1>この共有版の公開は終了しました</h1><p>ご利用ありがとうございました。</p></div></main>';});})();
+</script>
+<style>.expired body>*:not(.exp){display:none!important}.exp{min-height:100vh;display:grid;place-items:center;padding:24px;text-align:center;background:#10153a;color:#eef2fb;font-family:system-ui,sans-serif}.exp small{letter-spacing:.2em;color:#aeb8de}.exp h1{font-size:22px;margin:10px 0}.exp p{color:#aeb8de}</style>
+<title>チャオチャオ進行ボード</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Maru+Gothic:wght@500;700;900&display=swap">
+<style>
+/* Layout: 夜のジャングル（表紙の紺×水色ストライプ）の上に、切り絵の葉色カードを重ねる。上部固定ナビは sticky で本文と重ならない */
+:root{
+  --night:#10153a;      /* 表紙の深い紺 */
+  --navy:#1b2462;       /* カード面 */
+  --navy2:#253178;      /* 一段明るい面 */
+  --stripe:#55cfd9;     /* 表紙の水色ストライプ */
+  --leaf:#7ccb4b;       /* 切り絵の葉 */
+  --leaf-d:#2f8a4a;
+  --sun:#f7c51e;        /* タイトル黄 */
+  --orange:#f08a1c;     /* タイトル橙・夕日 */
+  --violet:#a08ae4;     /* 紫の花 */
+  --ink:#eef2fb;
+  --mute:#aeb8de;
+  --line:rgba(160,180,240,.22);
+  --bad:#ff6b7d;
+  --good:#7ee08a;
+  --p-yellow:#f2c12e; --p-green:#5cbf3c; --p-blue:#4a7bea; --p-pink:#ec5c93;
+  --f-disp:"Dela Gothic One","Hiragino Sans","Yu Gothic",sans-serif;
+  --f-body:"Zen Maru Gothic","Hiragino Maru Gothic ProN","Hiragino Sans","Yu Gothic",sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{background:var(--night)}
+body{background:var(--night);color:var(--ink);font-family:var(--f-body);font-size:15.5px;line-height:1.75;font-weight:500;
+  -webkit-text-size-adjust:100%;overflow-x:hidden}
+img{max-width:100%;height:auto;display:block}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+
+/* ===== sticky header (navigation) ===== */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;
+  background:
+    repeating-linear-gradient(90deg,rgba(85,207,217,.16) 0 14px,transparent 14px 34px,rgba(124,203,75,.10) 34px 44px,transparent 44px 70px),
+    var(--night);
+  border-bottom:2px solid var(--leaf-d);box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.top-in{max-width:960px;margin:0 auto;padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px));padding-block:8px 0}
+.brand{display:flex;align-items:baseline;gap:10px}
+.brand b{font-family:var(--f-disp);font-weight:400;font-size:22px;letter-spacing:.02em;
+  background:linear-gradient(90deg,var(--sun),var(--orange));-webkit-background-clip:text;background-clip:text;color:transparent;line-height:1.2}
+.brand span{font-size:12px;color:var(--mute);letter-spacing:.08em}
+nav.tabs{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-top:6px}
+nav.tabs button{background:transparent;border:0;border-radius:10px 10px 0 0;padding:8px 2px 9px;font-weight:900;font-size:14px;color:var(--mute);
+  display:flex;flex-direction:column;align-items:center;gap:1px;line-height:1.2}
+nav.tabs button small{font-size:10px;font-weight:700;letter-spacing:.06em;opacity:.8}
+nav.tabs button[aria-selected="true"]{background:var(--navy);color:var(--sun);box-shadow:inset 0 3px 0 var(--sun)}
+
+/* ===== main ===== */
+main{max-width:960px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 60px}
+section.tab{display:flex;flex-direction:column;gap:18px}
+h2{font-family:var(--f-disp);font-weight:400;font-size:24px;line-height:1.35;margin:6px 0 0;color:var(--sun);text-wrap:balance}
+h3{font-size:18px;font-weight:900;margin:0 0 6px;color:var(--stripe);text-wrap:balance}
+h4{font-size:15.5px;font-weight:900;margin:0 0 4px;color:var(--ink)}
+p{margin:0}
+.lead{color:var(--mute)}
+.card{background:var(--navy);border:1px solid var(--line);border-radius:16px;padding:16px;min-width:0}
+.card > * + *{margin-top:10px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.fig{margin:0;background:#fff;border-radius:12px;overflow:hidden;border:3px solid var(--orange)}
+.fig img{width:100%;height:auto}
+figcaption{background:var(--navy2);color:var(--ink);font-size:13px;padding:6px 10px;line-height:1.5}
+.fig.plain{border-color:var(--line);background:var(--navy2)}
+ul.dots,ol.steps{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+ul.dots li{position:relative;padding-left:20px}
+ul.dots li::before{content:"";position:absolute;left:3px;top:.68em;width:8px;height:8px;border-radius:50%;background:var(--leaf)}
+ul.dots.no li::before{background:var(--bad)}
+ul.dots.tip li::before{background:var(--sun)}
+.tag{display:inline-block;font-size:11.5px;font-weight:900;padding:1px 8px;border-radius:999px;letter-spacing:.04em;vertical-align:middle;line-height:1.7}
+.t-rule{background:rgba(124,203,75,.18);color:var(--leaf)}
+.t-web{background:rgba(85,207,217,.16);color:var(--stripe)}
+.t-our{background:rgba(160,138,228,.2);color:var(--violet)}
+.callout{border-left:4px solid var(--orange);background:rgba(240,138,28,.10);padding:10px 12px;border-radius:0 10px 10px 0}
+.callout.green{border-color:var(--leaf);background:rgba(124,203,75,.10)}
+.callout.blue{border-color:var(--stripe);background:rgba(85,207,217,.09)}
+.kbd{font-family:var(--f-disp);font-weight:400;color:var(--sun)}
+
+/* hero */
+.hero{display:grid;grid-template-columns:minmax(0,220px) minmax(0,1fr);gap:16px;align-items:center}
+.hero img{border-radius:12px;box-shadow:0 10px 24px rgba(0,0,0,.4)}
+.facts{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.facts span{background:var(--navy2);border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:13px;font-weight:700}
+@media (max-width:560px){.hero{grid-template-columns:1fr}.hero img{max-width:240px;margin:0 auto}}
+
+/* flow strip */
+.flow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;counter-reset:f}
+.flow div{background:var(--navy2);border-radius:12px;padding:10px;border-top:4px solid var(--stripe);min-width:0}
+.flow div:nth-child(2){border-top-color:var(--sun)}
+.flow div:nth-child(3){border-top-color:var(--orange)}
+.flow div:nth-child(4){border-top-color:var(--leaf)}
+.flow b{display:block;font-weight:900;font-size:15px}
+.flow b::before{counter-increment:f;content:counter(f);font-family:var(--f-disp);color:var(--sun);margin-right:6px}
+.flow p{font-size:13.5px;color:var(--mute);line-height:1.55}
+@media (max-width:640px){.flow{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* die */
+.die-row{display:flex;flex-wrap:wrap;gap:8px}
+.die{width:44px;height:44px;border-radius:9px;background:#151515;color:#f3f3e6;display:grid;place-items:center;font-family:var(--f-disp);font-size:22px;box-shadow:inset 0 -3px 0 rgba(255,255,255,.08)}
+.die.x{color:#f4e9b8}
+
+/* outcome table */
+.res{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+.res > div{border-radius:12px;padding:12px;background:var(--navy2);min-width:0}
+.res .r-true{border:2px solid var(--leaf)}
+.res .r-lie{border:2px solid var(--bad)}
+.res .r-none{border:2px solid var(--stripe)}
+
+/* checklist */
+.check{display:flex;flex-direction:column;gap:6px}
+.check label{display:flex;gap:10px;align-items:flex-start;background:var(--navy2);padding:9px 12px;border-radius:10px;cursor:pointer}
+.check input{width:20px;height:20px;margin-top:4px;accent-color:var(--leaf);flex:none}
+.check label:has(input:checked){opacity:.55;text-decoration:line-through}
+
+/* segmented */
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{border:2px solid var(--line);background:var(--navy2);border-radius:10px;padding:6px 14px;font-weight:900}
+.seg button[aria-pressed="true"]{border-color:var(--sun);color:var(--sun);background:rgba(247,197,30,.1)}
+
+/* buttons */
+.btn{border:0;border-radius:12px;padding:12px 16px;font-weight:900;font-size:16px;background:var(--leaf);color:#10203a;line-height:1.3}
+.btn.alt{background:var(--navy2);color:var(--ink);border:1px solid var(--line)}
+.btn.warn{background:var(--bad);color:#2a0710}
+.btn.sun{background:var(--sun);color:#2a1d00}
+.btn.sm{padding:7px 12px;font-size:13.5px;border-radius:10px}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+.btns .btn{flex:1 1 140px}
+
+/* ===== play ===== */
+.players{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.pc{background:var(--navy);border:2px solid var(--line);border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.pc.active{border-color:var(--sun);box-shadow:0 0 0 3px rgba(247,197,30,.25)}
+.pc.out{opacity:.8}
+.pc-h{display:flex;align-items:center;gap:8px;min-width:0}
+.pawn{width:22px;height:28px;flex:none;position:relative}
+.pawn::before{content:"";position:absolute;left:50%;top:0;width:12px;height:12px;border-radius:50%;background:var(--c);transform:translateX(-50%)}
+.pawn::after{content:"";position:absolute;left:50%;bottom:0;width:20px;height:19px;background:var(--c);clip-path:polygon(35% 0,65% 0,100% 100%,0 100%);transform:translateX(-50%)}
+.pc-h b{font-weight:900;font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stat{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;font-size:12px;color:var(--mute);text-align:center}
+.stat div{background:var(--navy2);border-radius:8px;padding:3px 2px;line-height:1.35}
+.stat strong{display:block;font-size:18px;color:var(--ink);font-variant-numeric:tabular-nums}
+.goals{display:flex;gap:5px;flex-wrap:wrap;align-items:center;font-size:12.5px;color:var(--mute)}
+.goals i{font-style:normal;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--sun);color:#2a1d00;font-weight:900;font-size:14px}
+.goals .slot{background:transparent;border:2px dashed var(--line);color:var(--mute)}
+.mini{font-size:12px;color:var(--mute)}
+.pill{display:inline-block;font-size:11.5px;font-weight:900;padding:0 8px;border-radius:999px;background:rgba(255,107,125,.16);color:var(--bad)}
+.pill.ok{background:rgba(124,203,75,.18);color:var(--leaf)}
+
+.turnbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:linear-gradient(90deg,rgba(247,197,30,.14),transparent);border:1px solid var(--line);border-radius:14px;padding:10px 14px}
+.turnbar .who{font-family:var(--f-disp);font-size:20px;color:var(--ink)}
+.turnbar .meta{margin-left:auto;font-size:13px;color:var(--mute)}
+.stepper{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;margin:0;padding:0;list-style:none}
+.stepper li{text-align:center;font-size:11.5px;font-weight:900;color:var(--mute);padding:6px 2px;border-radius:8px;background:var(--navy2);line-height:1.3}
+.stepper li.now{background:var(--sun);color:#2a1d00}
+.stepper li.done{background:rgba(124,203,75,.25);color:var(--leaf)}
+.wiz{background:var(--navy);border:2px solid var(--stripe);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px}
+.wiz h3{font-size:20px;color:var(--sun);margin:0}
+.big-num{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.big-num button{font-family:var(--f-disp);font-size:30px;padding:10px 0;border-radius:14px;border:0;background:var(--stripe);color:var(--night)}
+.chal{display:flex;flex-direction:column;gap:6px}
+.chal-row{display:flex;align-items:center;gap:10px;background:var(--navy2);border-radius:12px;padding:8px 10px}
+.chal-row .nm{flex:1;min-width:0;font-weight:900}
+.chal-row .nm small{display:block;font-weight:700;color:var(--mute);font-size:12px}
+.log{max-height:240px;overflow:auto;font-size:13px;color:var(--mute);display:flex;flex-direction:column;gap:2px;margin:0;padding:0;list-style:none}
+.log li{border-bottom:1px dashed var(--line);padding:3px 0}
+.form-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.form-row input[type=text]{flex:1 1 140px;min-width:0;background:var(--navy2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;color:var(--ink);font:inherit}
+.colors{display:flex;gap:6px}
+.colors button{width:34px;height:34px;border-radius:50%;border:3px solid transparent;background:var(--c)}
+.colors button[aria-pressed="true"]{border-color:#fff;box-shadow:0 0 0 2px var(--night) inset}
+.colors button:disabled{opacity:.18;cursor:not-allowed}
+.winner{text-align:center;padding:18px;border-radius:16px;background:linear-gradient(160deg,rgba(247,197,30,.25),rgba(240,138,28,.1));border:2px solid var(--sun)}
+.winner b{font-family:var(--f-disp);font-size:28px;color:var(--sun);display:block}
+.confirm{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:rgba(255,107,125,.1);border:1px solid var(--bad);padding:8px 10px;border-radius:10px}
+
+/* ===== quick ref ===== */
+.search{width:100%;background:var(--navy);border:2px solid var(--line);border-radius:12px;padding:10px 12px;color:var(--ink);font:inherit}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{border:1px solid var(--line);background:var(--navy2);border-radius:999px;padding:3px 12px;font-size:13px;font-weight:700}
+.chips button[aria-pressed="true"]{background:var(--stripe);color:var(--night);border-color:var(--stripe)}
+details.qa{background:var(--navy);border:1px solid var(--line);border-radius:12px;padding:0}
+details.qa summary{list-style:none;padding:11px 14px 11px 40px;font-weight:900;position:relative;cursor:pointer;line-height:1.5}
+details.qa summary::-webkit-details-marker{display:none}
+details.qa summary::before{content:"Q";position:absolute;left:13px;top:10px;font-family:var(--f-disp);color:var(--orange)}
+details.qa[open] summary{color:var(--sun)}
+details.qa .a{padding:0 14px 12px 40px;position:relative}
+details.qa .a::before{content:"A";position:absolute;left:13px;top:0;font-family:var(--f-disp);color:var(--leaf)}
+.qa-list{display:flex;flex-direction:column;gap:8px}
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:14px;min-width:480px}
+th,td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top}
+th{color:var(--stripe);font-weight:900;white-space:nowrap}
+td.num{font-variant-numeric:tabular-nums;text-align:right}
+
+.foot{font-size:12.5px;color:var(--mute)}
+.foot a{color:var(--stripe)}
+@media (prefers-reduced-motion:no-preference){.wiz{animation:pop .25s ease-out}@keyframes pop{from{transform:translateY(4px)}to{transform:none}}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <div class="brand"><b>チャオチャオ…！</b><span>進行ボード</span></div>
+    <nav class="tabs" role="tablist" aria-label="ページ切替">
+      <button role="tab" id="tb-intro" data-t="intro" aria-selected="true">はじめに<small>ルール</small></button>
+      <button role="tab" id="tb-setup" data-t="setup" aria-selected="false">準備<small>セットアップ</small></button>
+      <button role="tab" id="tb-play" data-t="play" aria-selected="false">進行<small>手番</small></button>
+      <button role="tab" id="tb-ref" data-t="ref" aria-selected="false">早見<small>迷ったら</small></button>
+      <button role="tab" id="tb-book" data-t="book" aria-selected="false">原本<small>ルール本</small></button>
+    </nav>
+  </div>
+</header>
+
+<main>
+<!-- ================= はじめに ================= -->
+<section class="tab" id="intro">
+  <div class="card hero">
+    <img src="img/cover.jpg" alt="チャオチャオ ルールブック表紙" width="900" height="899">
+    <div>
+      <h2>ウソを見抜け！ ジャングルのつり橋渡り</h2>
+      <p>探検家たちがボロボロのつり橋を渡ります。筒の中のサイコロは自分しか見られません。出た目を言って進みますが、<b>ウソをついてもいい</b>。ほかの人はそれを信じるか、「ウソだ！」と言うかを決めます。見破られた方の探検家は橋から落ちて「チャオチャオ（バイバイ）」です。</p>
+      <div class="facts"><span>2〜4人</span><span>8歳以上</span><span>25〜30分</span><span>作者 Alex Randolph</span><span>日本語版 メビウスゲームズ</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>勝ち方</h3>
+    <ul class="dots">
+      <li><b>自分の色のコマを3個ゴールさせたら、その場で勝ち。</b></li>
+      <li>誰も3個に届かないまま全員のコマが尽きたら、<b>ゴールに2個置いている人</b>の中で、置いたマスの番号の合計が一番大きい人の勝ち。番号は渡りきった順に①②③…なので、<b>あとから渡った方が高得点</b>です。</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>手番でやること（4つだけ）</h3>
+    <div class="flow">
+      <div><b>振る</b><p>筒にサイコロを入れ、手でふたをして振る</p></div>
+      <div><b>覗く</b><p>自分だけ筒の中を見る。サイコロは出さない</p></div>
+      <div><b>宣言して進む</b><p>1〜4のどれかを言い、その数だけ橋の板を進む</p></div>
+      <div><b>判定を待つ</b><p>左隣から順に「信じる？ウソだ？」</p></div>
+    </div>
+    <div class="grid2">
+      <div>
+        <h4>サイコロの目</h4>
+        <div class="die-row"><div class="die">1</div><div class="die">2</div><div class="die">3</div><div class="die">4</div><div class="die x">✕</div><div class="die x">✕</div></div>
+        <p class="mini" style="margin-top:6px">✕が出たら必ずウソ。出ていない1〜4のどれかを言います。</p>
+      </div>
+      <figure class="fig"><img src="img/parts.jpg" alt="4色のコマと✕の面のサイコロ" width="568" height="268"><figcaption>コマ（探検家）4色×7個とサイコロ</figcaption></figure>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>「ウソだ！」と言われたら</h3>
+    <p>筒の中の目が変わらないよう、そっと動かしてみんなで確認します。</p>
+    <div class="res">
+      <div class="r-true"><h4 style="color:var(--leaf)">本当だった</h4><p>「ウソだ！」と言った人のコマが橋から落ちる。手番の人は宣言どおり進む。</p></div>
+      <div class="r-lie"><h4 style="color:var(--bad)">ウソだった</h4><p>手番の人のコマが落ちる。「ウソだ！」と言った人のコマが、宣言された数だけ進む。</p></div>
+      <div class="r-none"><h4 style="color:var(--stripe)">誰も言わなかった</h4><p>筒を振って目をまぜてから、左隣に渡す。</p></div>
+    </div>
+    <figure class="fig" style="max-width:420px"><img src="img/ciao.jpg" alt="落ちたコマを橋の下へ" width="704" height="732"><figcaption>落ちたコマは橋の下へ。二度とゲームに戻りません</figcaption></figure>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>できること</h3>
+      <ul class="dots">
+        <li>本当の目でも、わざとウソの数を言う（ルール上OK。ただし公式は「あまりおすすめしない」）</li>
+        <li>他人の宣言に「ウソだ！」と言う（左隣から順番に聞かれる）</li>
+        <li>同じ板に何個コマが乗っていてもOK</li>
+        <li>橋にコマがなくても、ゴールに自分のコマがあれば、それを賭けて「ウソだ！」と言える</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>やってはダメなこと</h3>
+      <ul class="dots no">
+        <li>サイコロを筒から出す・他人に目を見せる</li>
+        <li>✕なのに「✕」と言う（1〜4以外は宣言できない）</li>
+        <li>「ウソだ！」の順番を飛ばす（左隣から時計回り。一人言った時点で打ち切り）</li>
+        <li>誰も指摘しなかったのに、振らずに筒を渡す（次の人に前の目がわかってしまう）</li>
+        <li>落ちたコマを再び使う</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>コツ</h3>
+    <ul class="dots tip">
+      <li><b>✕は3回に1回出ます。</b>「本当は正直、✕のときだけウソ」という人の宣言は、だいたい3回に2回は本当です。疑うなら根拠のあるときに。<span class="tag t-our">アプリの試算</span></li>
+      <li><b>指摘はリスクがあります。</b>外れると落ちるのは自分の橋の上のコマ。ゴール目前のコマを持っているときほど慎重に。逆に、スタートにいるコマなら失うものが少ないので強気に言えます。<span class="tag t-our">戦略の目安</span></li>
+      <li><b>当てると進めます。</b>ウソを見破ると、宣言された数だけ自分のコマが進みます。大きい数（4）のウソを見破るとおいしい。</li>
+      <li><b>全滅決着も狙えます。</b>3個ゴールが無理そうなら、2個目をゆっくり遅くゴールさせて番号の合計を大きくする手もあります。</li>
+      <li>毎回同じ数を言う、✕のとき目が泳ぐ…などのクセを読み合うのがこのゲームの醍醐味です。</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= 準備 ================= -->
+<section class="tab" id="setup" hidden>
+  <h2>セットアップ</h2>
+  <div class="card">
+    <h3>人数</h3>
+    <div class="seg" id="setup-n">
+      <button type="button" data-n="2" aria-pressed="false">2人</button>
+      <button type="button" data-n="3" aria-pressed="false">3人</button>
+      <button type="button" data-n="4" aria-pressed="true">4人</button>
+    </div>
+    <p class="mini">人数でルールは変わりません。使うコマの色数だけが変わります。</p>
+  </div>
+
+  <div class="card">
+    <h3>準備チェック</h3>
+    <div class="check" id="setup-check"></div>
+    <div class="btns"><button class="btn alt sm" type="button" id="setup-clear">チェックを外す</button></div>
+  </div>
+
+  <div class="grid2">
+    <figure class="fig"><img src="img/board-cut.jpg" alt="ボードの抜き取り部分（黄色斜線）と折り目（赤線）" width="690" height="656"><figcaption>初回のみ：黄色の斜線2か所を抜く。赤線は切らずに折り曲げて、下箱にセットする</figcaption></figure>
+    <figure class="fig"><img src="img/board-setup.jpg" alt="橋の端のスタート位置に各色1個を置いた状態" width="610" height="560"><figcaption>各色1個を、橋の端の矢印（スタート位置）に置く</figcaption></figure>
+  </div>
+
+  <div class="card">
+    <h3>常に守る置き方</h3>
+    <p class="callout green">橋の上には、できる限り<b>各プレイヤー1個ずつ</b>コマが乗っている状態を保ちます。コマが落ちたりゴールしたら、すぐ同じ色の次のコマをスタートに置きます。</p>
+    <figure class="fig" style="max-width:420px"><img src="img/goal.jpg" alt="ゴールの番号マスにコマを並べた様子" width="664" height="630"><figcaption>ゴールは番号マス（①②③…）。渡りきった順に置く</figcaption></figure>
+  </div>
+
+  <div class="card">
+    <h3>拡張</h3>
+    <p>チャオチャオに拡張はありません。切り替える項目はなく、どの人数でも同じルールです。</p>
+  </div>
+</section>
+
+<!-- ================= 進行 ================= -->
+<section class="tab" id="play" hidden>
+  <div id="play-root"></div>
+  <div class="card">
+    <h3>手番チェックリスト（いつでも確認用）</h3>
+    <ol class="stepper" aria-hidden="true"><li>振る</li><li>覗く</li><li>宣言</li><li>判定</li><li>処理</li><li>渡す</li></ol>
+    <ul class="dots">
+      <li>筒は手のひらでふたをして振る。覗くのは自分だけ</li>
+      <li>✕なら1〜4のどれかを言う（必ずウソ）</li>
+      <li>左隣から順に「ウソだ！」か聞く。一人でも言えば終わり</li>
+      <li>落ちた・ゴールしたコマがあれば、すぐ同色をスタートへ補充</li>
+      <li>誰も指摘しなかったら筒を振ってから左隣へ</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= 早見 ================= -->
+<section class="tab" id="ref" hidden>
+  <h2>早見・迷ったら</h2>
+  <div class="card">
+    <h3>結果の早見表</h3>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>場面</th><th>手番の人</th><th>「ウソだ！」と言った人</th></tr></thead>
+      <tbody>
+        <tr><td>誰も言わない</td><td>宣言の数だけ進む</td><td>－</td></tr>
+        <tr><td>指摘 → 本当だった</td><td>宣言の数だけ進む</td><td>橋の上のコマが落ちる（橋にコマがなければ、賭けたゴールのコマを取り除く）</td></tr>
+        <tr><td>指摘 → ウソだった</td><td>橋の上のコマが落ちる</td><td>宣言の数だけ進む（ゴールのコマを賭けた人は進めない）</td></tr>
+      </tbody>
+    </table></div>
+    <p class="mini">落ちたコマ・ゴールしたコマの分は、手持ちがあれば同色を即スタートへ。</p>
+  </div>
+
+  <input class="search" id="q" type="search" placeholder="キーワードで絞り込み（例：✕、ゴール、同点）" aria-label="早見を検索">
+  <div class="chips" id="qchips"></div>
+  <div class="qa-list" id="qa"></div>
+
+  <div class="card">
+    <h3>根拠の見分け方</h3>
+    <p><span class="tag t-rule">ルール本</span> 日本語版ルールに書いてあること　<span class="tag t-web">英語ルール</span> 英語版ルールの要約（RulesPal）　<span class="tag t-our">解釈</span> ルールに明記がなく、このアプリでの扱い方を示したもの。卓で合意して決めてください。</p>
+    <p class="foot">メビウスゲームズの公開FAQは見つかりませんでした。ルール本記載の問い合わせ先：メビウスゲームズ（03-3815-5956）。</p>
+  </div>
+</section>
+
+<!-- ================= 原本 ================= -->
+<section class="tab" id="book" hidden>
+  <h2>ルール本（補正済み写真）</h2>
+  <figure class="fig plain"><img src="img/page1.jpg" alt="ルール本 セット内容・準備・進行・ウソ？本当？" width="1394" height="1324"><figcaption>セット内容／ゲームの準備／ゲームの進行／ウソ？本当？</figcaption></figure>
+  <figure class="fig plain"><img src="img/page2.jpg" alt="ルール本 チャオチャオ・ゴール・ゲームの終了" width="1360" height="1356"><figcaption>チャオチャオ／ゴール／ゲームの終了</figcaption></figure>
+  <figure class="fig plain" style="max-width:520px"><img src="img/back.jpg" alt="ルール本 裏表紙" width="1000" height="936"><figcaption>裏表紙（クレジット）</figcaption></figure>
+</section>
+</main>
+
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s);
+const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* ---------- tabs ---------- */
+const TABS=["intro","setup","play","ref","book"];
+function show(t){
+  if(!TABS.includes(t))t="intro";
+  TABS.forEach(x=>{document.getElementById(x).hidden=(x!==t);document.getElementById("tb-"+x).setAttribute("aria-selected",x===t)});
+  window.scrollTo(0,0);
+}
+document.querySelectorAll("nav.tabs button").forEach(b=>b.addEventListener("click",()=>{show(b.dataset.t);try{history.replaceState(null,"","#"+b.dataset.t)}catch(e){}}));
+show((location.hash||"").slice(1)||"intro");
+
+/* ---------- setup checklist ---------- */
+const COLORS=[{k:"yellow",n:"黄",v:"var(--p-yellow)"},{k:"green",n:"緑",v:"var(--p-green)"},{k:"blue",n:"青",v:"var(--p-blue)"},{k:"pink",n:"ピンク",v:"var(--p-pink)"}];
+let setupN=store.get("cc_setupN")||4;
+function renderSetup(){
+  document.querySelectorAll("#setup-n button").forEach(b=>b.setAttribute("aria-pressed",+b.dataset.n===setupN));
+  const done=store.get("cc_check")||{};
+  const items=[
+    ["box","箱を開き、ボードを下箱にセット（初回は斜線部を抜き、赤線で折る）"],
+    ["color",`各自、色を決めてコマ7個を受け取る（${setupN}人なので${setupN}色。残りは箱へ）`],
+    ["start",`各色1個ずつ、橋の端の矢印（スタート）に置く → 橋の上に${setupN}個`],
+    ["hand","残り6個は各自の手元に置く（補充用）"],
+    ["die","サイコロを筒に入れる"],
+    ["first","最初の手番を決める（例：誕生日が一番近い人）。以後は時計回り"],
+    ["app","「進行」タブでプレイヤーを登録する（任意）"]
+  ];
+  $("#setup-check").innerHTML=items.map(([k,t])=>`<label><input type="checkbox" id="ck-${k}" data-k="${k}" ${done[k]?"checked":""}><span>${t}</span></label>`).join("");
+  $("#setup-check").querySelectorAll("input").forEach(i=>i.addEventListener("change",()=>{const d=store.get("cc_check")||{};d[i.dataset.k]=i.checked;store.set("cc_check",d)}));
+}
+document.querySelectorAll("#setup-n button").forEach(b=>b.addEventListener("click",()=>{setupN=+b.dataset.n;store.set("cc_setupN",setupN);renderSetup();if(!G)renderPlay()}));
+$("#setup-clear").addEventListener("click",()=>{store.set("cc_check",{});renderSetup()});
+renderSetup();
+
+/* ---------- game state ---------- */
+let G=store.get("cc_game");
+let H=store.get("cc_hist")||[];
+let draft=null; let confirmReset=false;
+function save(){store.set("cc_game",G);store.set("cc_hist",H.slice(-60))}
+function snap(){H.push(JSON.stringify(G));if(H.length>60)H.shift()}
+function col(p){return (COLORS.find(c=>c.k===p.color)||COLORS[0]).v}
+function nm(i){return esc(G.players[i].name)}
+function log(t){G.log.unshift(t);if(G.log.length>120)G.log.pop()}
+
+function newDraft(){
+  const n=setupN;
+  draft={n,first:0,players:COLORS.slice(0,n).map((c,i)=>({name:"プレイヤー"+(i+1),color:c.k}))};
+}
+function startGame(){
+  G={players:draft.players.map(p=>({name:p.name.trim()||"名無し",color:p.color,stock:6,bridge:1,goals:[],fallen:0,removed:0})),
+     turn:draft.first,slot:1,phase:"roll",decl:null,ch:null,chBridge:false,tasks:[],challenged:false,log:[],end:null,round:1};
+  log(`ゲーム開始。最初の手番は${nm(G.turn)}`);H=[];save();renderPlay();
+}
+function refill(i){const p=G.players[i];if(p.stock>0){p.stock--;p.bridge=1;log(`${nm(i)}：同色コマをスタートへ補充（手持ち残${p.stock}）`)}else{log(`${nm(i)}：手持ちがないので補充なし`)}}
+function fall(i){const p=G.players[i];p.bridge=0;p.fallen++;log(`チャオチャオ！ ${nm(i)}のコマが橋から落ちた`);refill(i)}
+function goal(i){const p=G.players[i];p.bridge=0;p.goals.push(G.slot);log(`${nm(i)}のコマがゴール！ ${G.slot}番マスへ`);G.slot++;refill(i)}
+function eligibleChallengers(){
+  const n=G.players.length,res=[];
+  for(let k=1;k<n;k++){const i=(G.turn+k)%n,p=G.players[i];if(p.bridge||p.goals.length)res.push(i)}
+  return res;
+}
+function checkEnd(){
+  const w=G.players.findIndex(p=>p.goals.length>=3);
+  if(w>=0){G.end={type:"three",win:[w]};G.phase="end";log(`${nm(w)}が3個ゴール！ 勝利`);return true}
+  if(G.players.every(p=>!p.bridge)){
+    let pool=G.players.map((p,i)=>i).filter(i=>G.players[i].goals.length===2);
+    let note="2個ゴールした人の中で合計番号を比較";
+    if(!pool.length){const mx=Math.max(...G.players.map(p=>p.goals.length));pool=G.players.map((p,i)=>i).filter(i=>G.players[i].goals.length===mx);note=`2個ゴールした人がいないため、最多${mx}個の人の中で合計番号を比較（ルールに明記なし）`}
+    const sum=i=>G.players[i].goals.reduce((a,b)=>a+b,0);
+    const best=Math.max(...pool.map(sum));
+    G.end={type:"out",win:pool.filter(i=>sum(i)===best),note,best};G.phase="end";log("全員のコマが尽きてゲーム終了");return true;
+  }
+  return false;
+}
+function nextTask(){
+  if(checkEnd())return;
+  if(G.tasks.length){G.phase=G.tasks[0].t;return}
+  G.phase="pass";
+}
+function nextTurn(){
+  const n=G.players.length;let t=G.turn,wrap=false;
+  for(let k=1;k<=n;k++){const i=(G.turn+k)%n;if(G.players[i].bridge){t=i;wrap=(G.turn+k)>=n;break}}
+  if(wrap)G.round++;
+  G.turn=t;G.phase="roll";G.decl=null;G.ch=null;G.tasks=[];G.challenged=false;
+  log(`— ${nm(t)}の手番 —`);
+}
+function act(fn){snap();fn();save();renderPlay()}
+
+/* ---------- render play ---------- */
+const STEPS=[["roll","振る"],["peek","覗く"],["declare","宣言"],["judge","判定"],["resolve","処理"],["pass","渡す"]];
+function stepIdx(ph){return {roll:0,peek:1,declare:2,judge:3,reveal:4,goal:4,bet:4,pass:5,end:6}[ph]}
+function playerCards(){
+  return `<div class="players">${G.players.map((p,i)=>{
+    const sum=p.goals.reduce((a,b)=>a+b,0);
+    const left=p.stock+p.bridge;
+    return `<div class="pc ${i===G.turn&&G.phase!=="end"?"active":""} ${!p.bridge?"out":""}">
+      <div class="pc-h"><span class="pawn" style="--c:${col(p)}"></span><b>${esc(p.name)}</b>${i===G.turn&&G.phase!=="end"?'<span class="pill ok">手番</span>':""}${!p.bridge&&G.phase!=="end"?`<span class="pill">${p.goals.length?"賭けのみ":"見物"}</span>`:""}</div>
+      <div class="stat"><div><strong>${p.bridge?"●":"－"}</strong>橋の上</div><div><strong>${p.stock}</strong>手持ち</div><div><strong>${p.fallen}</strong>落下</div></div>
+      <div class="goals">ゴール ${[0,1,2].map(k=>p.goals[k]!=null?`<i>${p.goals[k]}</i>`:`<i class="slot">${k+1}</i>`).join("")} <span>計${sum}</span></div>
+      <div class="mini">残りコマ ${left}／7${p.removed?`・賭けで失った${p.removed}`:""}</div>
+    </div>`}).join("")}</div>`;
+}
+function wizard(){
+  const a=G.turn,ap=G.players[a],d=G.decl;
+  const who=`<span style="color:${col(ap)}">${nm(a)}</span>`;
+  switch(G.phase){
+  case "roll": return `<div class="wiz"><h3>① 筒を振る</h3>
+    <p>${who}は筒にサイコロを入れ、手のひらでふたをしてよく振る。</p>
+    <div class="btns"><button class="btn" data-a="rolled">振った</button></div></div>`;
+  case "peek": return `<div class="wiz"><h3>② こっそり覗く</h3>
+    <p>他の人に見えないように、自分だけ筒の中を見る。<b>サイコロは筒から出さない。</b></p>
+    <p class="callout">✕が出ていたら、必ず1〜4のどれかでウソをつく。</p>
+    <div class="btns"><button class="btn" data-a="peeked">目を確認した</button></div></div>`;
+  case "declare": return `<div class="wiz"><h3>③ 宣言して進む</h3>
+    <p>${who}が言った数をタップ。その数だけ自分のコマを橋の板に沿って進める。</p>
+    <div class="big-num">${[1,2,3,4].map(n=>`<button data-a="decl" data-v="${n}" aria-label="${n}と宣言">${n}</button>`).join("")}</div>
+    <p class="mini">本当の目と違う数を言ってもよい（ルール上は「あまりおすすめしない」）。</p></div>`;
+  case "judge":{
+    const el=eligibleChallengers();
+    return `<div class="wiz"><h3>④ 判定：「${d}」は本当？</h3>
+    <p>左隣から時計回りに聞く。<b>一人でも「ウソだ！」と言えば、残りの人は聞かない。</b></p>
+    <div class="chal">${el.length?el.map(i=>{const p=G.players[i];return `<div class="chal-row"><span class="pawn" style="--c:${col(p)}"></span><span class="nm">${nm(i)}<small>${p.bridge?"外れたら橋の上のコマが落ちる":"ゴールのコマを賭ける（当てても自分は進めない）"}</small></span><button class="btn warn sm" data-a="chal" data-v="${i}">ウソだ！</button></div>`}).join(""):`<p class="mini">指摘できる人がいません。</p>`}</div>
+    <div class="btns"><button class="btn alt" data-a="nochal">誰も言わない</button></div></div>`}
+  case "reveal":{
+    const c=G.ch;
+    return `<div class="wiz"><h3>⑤ 筒の中を確認</h3>
+    <p>${nm(c)}が「ウソだ！」。目が変わらないよう<b>そっと筒を動かして</b>、みんなで見る。宣言は「${d}」。</p>
+    <div class="btns"><button class="btn" data-a="truth">${d}が出ていた（本当）</button><button class="btn warn" data-a="lie">違う目・✕だった（ウソ）</button></div>
+    <p class="mini">本当 → ${nm(c)}${G.chBridge?"のコマが落ちる":"が賭けたゴールのコマを失う"}、${nm(a)}は${d}進む<br>ウソ → ${nm(a)}のコマが落ちる${G.chBridge?`、${nm(c)}が${d}進む`:""}</p></div>`}
+  case "goal":{
+    const t=G.tasks[0],p=G.players[t.p];
+    return `<div class="wiz"><h3>⑤ ゴール確認</h3>
+    <p><span style="color:${col(p)}">${nm(t.p)}</span>のコマを${t.n}進めた結果、<b>橋を渡りきった？</b></p>
+    <p class="mini">渡りきったら、空いている一番小さい番号のマス（次は${G.slot}番）に置く。</p>
+    <div class="btns"><button class="btn sun" data-a="goalyes">渡りきった（${G.slot}番へ）</button><button class="btn alt" data-a="goalno">まだ橋の上</button></div></div>`}
+  case "bet":{
+    const t=G.tasks[0],p=G.players[t.p];
+    return `<div class="wiz"><h3>⑤ 賭けたコマを取り除く</h3>
+    <p>${nm(t.p)}の指摘は外れ。賭けたゴールのコマを1個取り除きます。どれ？</p>
+    <div class="btns">${p.goals.map((g,k)=>`<button class="btn warn" data-a="betrm" data-v="${k}">${g}番のコマ</button>`).join("")}</div></div>`}
+  case "pass": return `<div class="wiz"><h3>⑥ 左隣へ渡す</h3>
+    <p>${G.challenged?"サイコロを筒に戻して":"<b>筒を振って目をまぜてから</b>"}、左隣に渡す。</p>
+    <p class="mini">落ちた／ゴールしたコマの補充は済んでいます（下の表で手持ちを確認）。</p>
+    <div class="btns"><button class="btn" data-a="next">次の手番へ</button></div></div>`;
+  case "end":{
+    const e=G.end;const names=e.win.map(i=>`<span style="color:${col(G.players[i])}">${nm(i)}</span>`).join("・");
+    return `<div class="winner"><b>${names} の勝ち！</b>
+      <p>${e.type==="three"?"3個のコマをゴールさせました。":`${esc(e.note)}。合計 ${e.best} 点。`}${e.win.length>1?"<br>同点です（ルールに決着方法の記載なし）。":""}</p></div>`}
+  }
+  return "";
+}
+function renderPlay(){
+  const root=$("#play-root");
+  if(!G){
+    if(!draft||draft.n!==setupN)newDraft();
+    const used=draft.players.map(p=>p.color);
+    root.innerHTML=`<div class="card"><h3>プレイヤー登録</h3>
+      <div class="seg" id="pl-n">${[2,3,4].map(n=>`<button type="button" data-n="${n}" aria-pressed="${n===draft.n}">${n}人</button>`).join("")}</div>
+      ${draft.players.map((p,i)=>`<div class="form-row"><span class="pawn" style="--c:${col(p)}"></span><input type="text" id="pn-${i}" data-i="${i}" value="${esc(p.name)}" maxlength="12" aria-label="プレイヤー${i+1}の名前">
+        <div class="colors">${COLORS.map(c=>`<button type="button" style="--c:${c.v}" data-i="${i}" data-c="${c.k}" aria-label="${c.n}" aria-pressed="${p.color===c.k}" ${used.includes(c.k)&&p.color!==c.k?"disabled":""}></button>`).join("")}</div></div>`).join("")}
+      <h4>最初の手番（ここから時計回り）</h4>
+      <div class="seg" id="pl-first">${draft.players.map((p,i)=>`<button type="button" data-i="${i}" aria-pressed="${i===draft.first}">${esc(p.name)}</button>`).join("")}</div>
+      <p class="mini">名前は座っている時計回りの順に入れてください。</p>
+      <div class="btns"><button class="btn sun" id="go">ゲーム開始</button></div></div>`;
+    root.querySelectorAll("#pl-n button").forEach(b=>b.onclick=()=>{setupN=+b.dataset.n;store.set("cc_setupN",setupN);newDraft();renderSetup();renderPlay()});
+    root.querySelectorAll("input[data-i]").forEach(inp=>inp.oninput=()=>{draft.players[+inp.dataset.i].name=inp.value;const fb=root.querySelector(`#pl-first button[data-i="${inp.dataset.i}"]`);if(fb)fb.textContent=inp.value||"名無し"});
+    root.querySelectorAll(".colors button").forEach(b=>b.onclick=()=>{draft.players[+b.dataset.i].color=b.dataset.c;renderPlay()});
+    root.querySelectorAll("#pl-first button").forEach(b=>b.onclick=()=>{draft.first=+b.dataset.i;root.querySelectorAll("#pl-first button").forEach(x=>x.setAttribute("aria-pressed",x===b))});
+    $("#go").onclick=startGame;
+    return;
+  }
+  const si=stepIdx(G.phase);
+  const ap=G.players[G.turn];
+  root.innerHTML=`<div style="display:flex;flex-direction:column;gap:12px">
+    ${G.phase!=="end"?`<div class="turnbar"><span class="pawn" style="--c:${col(ap)}"></span><span class="who">${nm(G.turn)}の手番</span><span class="meta">${G.round}巡目・次のゴール ${G.slot}番</span></div>
+    <ol class="stepper">${STEPS.map((s,k)=>`<li class="${k<si?"done":k===si?"now":""}">${s[1]}</li>`).join("")}</ol>`:""}
+    ${wizard()}
+    ${playerCards()}
+    <div class="btns">
+      <button class="btn alt sm" id="undo" ${H.length?"":"disabled"}>ひとつ戻す</button>
+      <button class="btn alt sm" id="reset">ゲームを終わる／やり直す</button>
+    </div>
+    ${confirmReset?`<div class="confirm"><span>記録を消して登録画面に戻ります。</span><button class="btn warn sm" id="reset-yes">消して戻る</button><button class="btn alt sm" id="reset-no">やめる</button></div>`:""}
+    <div class="card"><h3>記録</h3><ul class="log">${G.log.map(l=>`<li>${l}</li>`).join("")}</ul></div>
+  </div>`;
+  root.querySelectorAll("[data-a]").forEach(b=>b.addEventListener("click",()=>handle(b.dataset.a,b.dataset.v)));
+  $("#undo").onclick=()=>{if(!H.length)return;G=JSON.parse(H.pop());save();renderPlay()};
+  $("#reset").onclick=()=>{confirmReset=true;renderPlay()};
+  if(confirmReset){$("#reset-yes").onclick=()=>{confirmReset=false;G=null;H=[];store.set("cc_game",null);store.set("cc_hist",[]);renderPlay()};$("#reset-no").onclick=()=>{confirmReset=false;renderPlay()}}
+}
+function handle(a,v){
+  act(()=>{
+    const t=G.turn;
+    switch(a){
+      case "rolled":G.phase="peek";break;
+      case "peeked":G.phase="declare";break;
+      case "decl":G.decl=+v;log(`${nm(t)}：「${v}！」と宣言して${v}進む`);G.phase="judge";break;
+      case "nochal":log("誰も「ウソだ！」と言わなかった");G.tasks=[{t:"goal",p:t,n:G.decl}];nextTask();break;
+      case "chal":{const c=+v;G.ch=c;G.chBridge=!!G.players[c].bridge;G.challenged=true;log(`${nm(c)}「ウソだ！」${G.chBridge?"":"（ゴールのコマを賭けて）"}`);G.phase="reveal";break}
+      case "truth":{const c=G.ch;log(`本当だった（${G.decl}）`);
+        if(G.chBridge){fall(c);G.tasks=[{t:"goal",p:t,n:G.decl}]}
+        else{G.tasks=[{t:"bet",p:c},{t:"goal",p:t,n:G.decl}]}
+        nextTask();break}
+      case "lie":{const c=G.ch;log("ウソだった！");fall(t);
+        G.tasks=G.chBridge?[{t:"goal",p:c,n:G.decl}]:[];
+        if(G.chBridge)log(`${nm(c)}のコマが${G.decl}進む`);
+        nextTask();break}
+      case "goalyes":{const tk=G.tasks.shift();goal(tk.p);nextTask();break}
+      case "goalno":{G.tasks.shift();nextTask();break}
+      case "betrm":{const tk=G.tasks.shift();const p=G.players[tk.p];const g=p.goals.splice(+v,1)[0];p.removed++;log(`${nm(tk.p)}：賭けた${g}番のコマを取り除いた`);nextTask();break}
+      case "next":{if(!checkEnd())nextTurn();break}
+    }
+  });
+}
+renderPlay();
+
+/* ---------- quick reference ---------- */
+const QA=[
+ {c:"宣言",q:"✕が出たら何と言えばいい？",a:"1〜4のどれかを言います。✕は数字ではないので、何を言っても必ずウソになります。「✕」とは言えません。",s:"rule"},
+ {c:"宣言",q:"本当の目が出ていても、ウソをついていい？",a:"ルール上はOKです。ただしルール本には「あまりおすすめできない」とあります。見破られると自分のコマが落ちるだけなので、作戦として使うかはお好みで。",s:"rule"},
+ {c:"宣言",q:"0や5、6を宣言できる？",a:"できません。宣言できるのは1〜4だけです。",s:"rule"},
+ {c:"宣言",q:"コマは宣言してすぐ進める？判定の後？",a:"ルール本は「宣言し、その数だけ進める」としています。卓では宣言と同時に進めて、指摘されたら結果に応じて落とすのが分かりやすいです。どちらでも結果は同じです。",s:"our"},
+ {c:"判定",q:"「ウソだ！」は誰から聞く？",a:"手番の人の左隣から時計回りに一人ずつ判断します。一人でも「ウソだ！」と言ったら、そこで打ち切り。残りの人は判断しません。",s:"rule"},
+ {c:"判定",q:"二人同時に「ウソだ！」と言ったら？",a:"ルールに記載はありません。順番に聞くのが本来の手順なので、手番の人から見て時計回りで先の人を優先するのが自然です。",s:"our"},
+ {c:"判定",q:"指摘が当たったら、言った人はどうなる？",a:"手番の人のコマが落ち、「ウソだ！」と言った人の橋の上のコマが、宣言された数だけ進みます。",s:"rule"},
+ {c:"判定",q:"指摘が外れたら？",a:"「ウソだ！」と言った人の橋の上のコマが落ちます。手番の人は宣言どおり進みます。",s:"rule"},
+ {c:"判定",q:"本当だったとき、手番の人は進める？",a:"進めます。日本語版は宣言した時点で進む書き方で、英語版ルールの要約でも「正直だった手番プレイヤーは宣言どおり進む」とされています。",s:"web"},
+ {c:"判定",q:"「ウソだ！」の後、筒はどう扱う？",a:"中の目が変わらないよう、そっと移動して全員で確認します。振ったり傾けたりしないこと。",s:"rule"},
+ {c:"手番の終わり",q:"誰も指摘しなかったら、筒はそのまま渡す？",a:"いいえ。筒を振って中の目がわからないようにしてから、左隣に渡します。",s:"rule"},
+ {c:"コマ",q:"同じ板に複数のコマが乗ってもいい？",a:"構いません。押し出しや追い越しの制限もありません。",s:"rule"},
+ {c:"コマ",q:"コマが落ちたら、次のコマはいつ置く？",a:"ただちに、同じ色のコマを1個スタート位置に置きます。ゴールしたときも同じです。橋の上には、なるべく各色1個ずつを保ちます。",s:"rule"},
+ {c:"コマ",q:"落ちたコマを拾って使える？",a:"使えません。橋の下に落ちた探検家は二度とゲームに戻りません。",s:"rule"},
+ {c:"ゴール",q:"ちょうどの数でゴールしないとダメ？",a:"ルールは「無事に橋を渡りきったら」ゴールとしているので、最後の板を越える数ならゴールです。ぴったりである必要はありません（英語版も「最後の板を越えたら」）。",s:"web"},
+ {c:"ゴール",q:"ゴールの番号はどう決まる？",a:"色に関係なく、渡りきった順に①②③…と置いていきます。番号がそのまま点数になります（全滅決着のとき）。",s:"rule"},
+ {c:"ゴール",q:"「ウソだ！」を当てた人のコマがゴールしたら？",a:"普通のゴールと同じく、次の番号のマスに置きます。その人も同色を補充します。",s:"our"},
+ {c:"手持ちなし",q:"橋にもコマがなく手持ちもない人は？",a:"手番はできず飛ばされます。ゴールに自分のコマがあれば、それを賭けて「ウソだ！」と言えます。",s:"rule"},
+ {c:"手持ちなし",q:"ゴールのコマを賭けた指摘の結果は？",a:"外れたら（本当だったら）賭けたコマを取り除きます。当たったら手番の人のコマは落ちますが、自分は進めず直接の得はありません。",s:"rule"},
+ {c:"手持ちなし",q:"賭けで取り除いたコマの番号マスは空きに戻る？",a:"ルールに記載はありません。このアプリでは番号は使い切りとし、次のゴールは続きの番号から置きます。",s:"our"},
+ {c:"手持ちなし",q:"ゴールのコマが全部なくなったら？",a:"賭けるコマがないので、もう「ウソだ！」とも言えません。見ているだけになります。",s:"web"},
+ {c:"終了",q:"ゲームが終わるのはいつ？",a:"①誰かが3個ゴールした瞬間（その人の勝ち）。②全員のコマが落ちるかゴールして、橋に誰のコマもなくなったとき。",s:"rule"},
+ {c:"終了",q:"②の終わり方で勝つのは？",a:"ゴールに2個置いている人の中で、置いたマスの番号の合計が一番大きい人です。遅くゴールした方が番号が大きいので有利です。",s:"rule"},
+ {c:"終了",q:"2個ゴールした人が一人もいなかったら？",a:"ルール本に記載はありません。英語版の要約は「最も得点の多い人の勝ち」としています。このアプリでは最多個数の人の中で番号の合計を比べます。",s:"web"},
+ {c:"終了",q:"合計が同点だったら？",a:"ルールに記載はありません。引き分けにするか、もう1ゲームで決めるかを卓で決めてください。",s:"our"},
+ {c:"人数",q:"2人のときに変わるルールは？",a:"ありません。「ウソだ！」を判断するのが相手1人になるだけです。",s:"rule"},
+ {c:"準備",q:"最初の手番は誰？",a:"適当な方法で決めます。ルール本の例は「誕生日が一番近い人」。以後は時計回りです。",s:"rule"},
+ {c:"準備",q:"ボードの抜く所・折る所がわからない",a:"黄色い斜線の2か所を抜きます。赤線の部分は切らずに折り曲げ、下箱にセットします（「準備」タブの写真参照）。",s:"rule"}
+];
+const SRC={rule:'<span class="tag t-rule">ルール本</span>',web:'<span class="tag t-web">英語ルール</span>',our:'<span class="tag t-our">解釈</span>'};
+let qcat="すべて";
+const cats=["すべて",...new Set(QA.map(x=>x.c))];
+function renderQA(){
+  const q=($("#q").value||"").trim().toLowerCase();
+  $("#qchips").innerHTML=cats.map(c=>`<button type="button" data-c="${c}" aria-pressed="${c===qcat}">${c}</button>`).join("");
+  $("#qchips").querySelectorAll("button").forEach(b=>b.onclick=()=>{qcat=b.dataset.c;renderQA()});
+  const list=QA.filter(x=>(qcat==="すべて"||x.c===qcat)&&(!q||(x.q+x.a+x.c).toLowerCase().includes(q)));
+  $("#qa").innerHTML=list.length?list.map(x=>`<details class="qa"${q?" open":""}><summary>${x.q}</summary><div class="a"><p>${x.a}</p><p style="margin-top:4px">${SRC[x.s]} <span class="mini">${x.c}</span></p></div></details>`).join(""):`<p class="lead">該当なし。別の言葉で探してください。</p>`;
+}
+$("#q").addEventListener("input",renderQA);
+renderQA();
+})();
+</script>
+
+</body>
+</html>
