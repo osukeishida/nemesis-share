@@ -659,6 +659,7 @@ section.panel{grid-template-columns:minmax(0,1fr)}#qaList,#flow,.cres{grid-templ
 <!-- ───────── CARDS ───────── -->
 <section class="panel" id="p-cards" hidden>
   <input class="search" id="cSearch" type="search" placeholder="カード名（日本語・英語）や効果の言葉で検索" aria-label="カード検索">
+  <select class="search" id="cOwnerSel" aria-label="キャラクターで絞り込む" style="margin-top:8px"></select>
   <div class="chips" id="cChips"></div>
   <div class="count" id="cCount"></div>
   <div class="cres" id="cRes"></div>
@@ -1446,9 +1447,12 @@ function fsCats(){const R=S.race,L=[['all','すべて'],['act','手札（アク�
   if(R==='neo')L.push(['skill','スキル']);
   L.push(['qh',R==='sang'?'キングの体力':R==='neo'?'マザーブレインの体力':'クイーンの体力']);
   if(S.xy)L.push(['xy','ジリアン']);return L}
+const CK5=['BASIC SECURE','DEMOLITION','REST','SEARCH','REPAIRS'];
+function deckHas(me,c){if(c.c!=='アクション')return false;if(chKey(c.s)===me)return true;
+  const old=CARDS.filter(x=>x.c==='アクション'&&chKey(x.s)===me).length===5;return old&&chKey(c.s)==='CONTRACTOR'&&CK5.includes(c.en)}
+function ownCards(me){return CARDS.filter(c=>deckHas(me,c)||(c.c==='キャラクターアイテム'&&chKey(c.s)===me))}
 function fsPool(k){const R=S.race,E=RACEEN[R],me=S.char?chKey(S.char):'';
-  const CK5=['BASIC SECURE','DEMOLITION','REST','SEARCH','REPAIRS'],old=me&&CARDS.filter(c=>c.c==='アクション'&&chKey(c.s)===me).length===5;
-  const act=c=>c.c==='アクション'&&(me?(chKey(c.s)===me||(old&&chKey(c.s)==='CONTRACTOR'&&CK5.includes(c.en))):true);
+  const act=c=>c.c==='アクション'&&(me?deckHas(me,c):true);
   const ev=c=>(c.c==='イベント'&&c.s0===E)||(S.xy&&c.c==='ジリアン'&&c.s0==='イベント');
   const T={act,ev,exp:c=>S.xy&&c.c==='ジリアン'&&c.s0==='探査',cont:c=>R==='sang'&&c.c==='汚染',shadow:c=>R==='sang'&&c.c==='シャドウ',tb:c=>R==='sang'&&c.c==='血の穢れ',skill:c=>R==='neo'&&c.c==='スキル',
     qh:c=>c.c==='クイーンの体力'&&c.s0===E,xy:c=>S.xy&&c.c==='ジリアン'&&!['アイテム','ヘルプ'].includes(c.s0)};
@@ -2357,7 +2361,7 @@ function renderRooms(){
 
 /* ───────── CARDS ───────── */
 const CATS=['すべて',...Array.from(new Set(CARDS.map(c=>c.c)))];
-let cat='すべて';
+let cat='すべて',cOwner='';
 function renderChips(){$('#cChips').innerHTML=CATS.map(c=>`<button aria-pressed="${c===cat}" data-c="${c}">${c}</button>`).join('');
   $('#cChips').querySelectorAll('button').forEach(b=>b.onclick=()=>{cat=b.dataset.c;renderChips();renderCards()})}
 const OLDTERMS=[['アダルト','完全体'],['ドローン操縦士','\u0001'],['探査ドローン','\u0002'],['ドローン','凶暴体'],['\u0001','ドローン操縦士'],['\u0002','探査ドローン'],['ラーヴァ','幼体'],['部屋','ルーム'],['セクション','区画'],['着陸機','着陸船'],['離陸','発進'],['着陸地点','発着場'],['射撃ダイス','火器攻撃ダイス'],['射撃攻撃','火器攻撃'],['射撃','火器攻撃'],['セキュア','警備'],['自爆','自動爆破'],['対空防御','対空システム'],['クリーンアップ','準備フェイズ'],['バッグ','袋'],['ブランク','ダミー'],['医療パック','医療器具'],['戦術装備','戦術用具'],['支援装備','追加装備'],['作戦任務','任務'],['作戦の目的','任務目的'],['個人の目的','個人目的'],['ヘルス','体力'],['hp','体力'],['急襲','奇襲'],['羽化','誕生'],['黄金律','悪夢ルール'],['デッキ','山'],['ルームアクション','ルームの利用']];
@@ -2454,15 +2458,19 @@ function cardHTML(c){
 const GUIDE=[['アクション','手札。1手番に2アクション、カード右上のコスト分だけ他の手札を捨てて使う。基本アクションは全員共通、それ以外はキャラクター専用。'],['アイテム','ルームの探索で手に入る。赤・黄・緑の3色。「1回のみ」「このアイテムを捨てて」と書いてなければ何度でも使える。'],['追加装備','ゲーム開始時に配られる強力な装備。多くは重量アイテム（ハンドスロットを使う）。'],['キャラクターアイテム','各キャラクター専用の初期装備・クエスト報酬。'],['目的','勝利条件。生き残る（脱出／コールドスリープ）＋目的達成で勝ち。'],['イベント','イベントフェイズで1枚。移動シンボルの群れが動き、効果が起こる。'],['攻撃','イントルーダーが攻撃してくるときに引く。'],['重傷','重傷を負ったときに受ける。手当て・治療方法がカードに書かれている。'],['ルーム','ルームタイルの効果（ルームの利用）。']];
 function renderCards(){
   const q=norm($('#cSearch').value||'');
-  let L=CARDS.filter(c=>(cat==='すべて'||c.c===cat)&&(!q||c._q.includes(q)));
+  const ZC=typeof ZK_CHAR!=='undefined'?ZK_CHAR:[];const sel=$('#cOwnerSel');
+  if(sel){if(!sel.options.length){sel.innerHTML='<option value="">キャラクター：すべて</option><optgroup label="キャラクター">'+ZC.filter(z=>!z.x).map(z=>`<option value="${esc(chKey(z.en))}">${esc(z.n)}</option>`).join('')+'</optgroup><optgroup label="同行者（Contractors拡張）">'+ZC.filter(z=>z.x).map(z=>`<option value="${esc(chKey(z.en))}">${esc(z.n)}</option>`).join('')+'</optgroup>';sel.onchange=()=>{cOwner=sel.value;renderCards()}}sel.value=cOwner}
+  const ob=cOwner?(()=>{const z=ZC.find(z=>chKey(z.en)===cOwner);return `<div class="primer"><span class="k">${esc(z?z.n:cOwner)}のカード</span>アクションカード10枚とキャラクターアイテム。種類のボタンや検索語でさらに絞り込めます。 <button class="btn" data-cown="1">解除</button></div>`})():'';
+  let L=(cOwner?ownCards(cOwner):CARDS).filter(c=>(cat==='すべて'||c.c===cat)&&(!q||c._q.includes(q)));
   const n=L.length;const pr=cat!=='すべて'&&TP[cat]?`<div class="primer"><span class="k">「${esc(cat)}」とは</span>${ic(TP[cat])}</div>`:'';
-  if(!q&&cat==='すべて'){$('#cCount').textContent=`全${CARDS.length}枚。名前・効果・やりたいこと（例：回復、ドア、弾薬、酸素）で検索するか、種類を選んでください。`;
+  if(!q&&cat==='すべて'&&!cOwner){$('#cCount').textContent=`全${CARDS.length}枚。名前・効果・やりたいこと（例：回復、ドア、弾薬、酸素）で検索するか、種類を選んでください。`;
     $('#cRes').innerHTML=`<div class="card"><div class="eyebrow">Beginner guide</div><h2>カードの種類と読み方</h2><dl class="guide">${GUIDE.map(([k,v])=>`<dt><button class="lnk" data-gc="${k}">${k}</button></dt><dd>${v}</dd>`).join('')}</dl>
     <p class="note">各カードには「ひとことで」（何ができるか）、「カードの効果」（和訳本文）、「強み・使いどころ」「注意」を表示します（重傷カードは「どんな悪影響？」「治し方」、目的カードは「達成のコツ」、イントルーダーのスキルは「対策」）。効果に「選択肢A／B」とあるカードは、使うときにどちらか1つを選びます。</p></div>`;
     $('#cRes').querySelectorAll('[data-gc]').forEach(b=>b.onclick=()=>{cat=b.dataset.gc;renderChips();renderCards()});return}
   L=L.slice(0,80);
   $('#cCount').textContent=n+'件'+(n>80?'（先頭80件を表示。言葉を足して絞り込めます）':'');
-  $('#cRes').innerHTML=pr+L.map(cardHTML).join('');
+  $('#cRes').innerHTML=ob+pr+L.map(cardHTML).join('');
+  $('#cRes').querySelectorAll('[data-cown]').forEach(b=>b.onclick=()=>{cOwner='';renderCards()});
 }
 $('#cSearch').oninput=renderCards;
 
@@ -2857,7 +2865,7 @@ function renderZukan(){
   box.innerHTML=head+body;
   box.querySelectorAll('[data-zm]').forEach(b=>b.onclick=()=>{S.zkMode=b.dataset.zm;save();renderZukan()});
   const zq=$('#zkQ');zq.oninput=()=>{const p=zq.selectionStart;renderZukan();const n=$('#zkQ');n.focus();try{n.setSelectionRange(p,p)}catch(e){}};
-  box.querySelectorAll('[data-zc]').forEach(b=>b.onclick=()=>{cat='すべて';renderChips();$('#cSearch').value=b.dataset.zc;renderCards();showTab('cards')});
+  box.querySelectorAll('[data-zc]').forEach(b=>b.onclick=()=>{cat='すべて';renderChips();const own=b.textContent==='この人のカードを見る';$('#cSearch').value=own?'':b.dataset.zc;cOwner=own?chKey(b.dataset.zc):cOwner;renderCards();showTab('cards')});
 }
 
 /* ───────── boot ───────── */
