@@ -1447,7 +1447,7 @@ function fsCats(){const R=S.race,L=[['all','すべて'],['act','手札（アク�
   L.push(['qh',R==='sang'?'キングの体力':R==='neo'?'マザーブレインの体力':'クイーンの体力']);
   if(S.xy)L.push(['xy','ジリアン']);return L}
 function fsPool(k){const R=S.race,E=RACEEN[R],me=S.char?chKey(S.char):'';
-  const act=c=>c.c==='アクション'&&(!me||c.s==='COMMON'||chKey(c.s)===me);
+  const act=c=>c.c==='アクション'&&(me?chKey(c.s)===me:true);
   const ev=c=>(c.c==='イベント'&&c.s0===E)||(S.xy&&c.c==='ジリアン'&&c.s0==='イベント');
   const T={act,ev,exp:c=>S.xy&&c.c==='ジリアン'&&c.s0==='探査',cont:c=>R==='sang'&&c.c==='汚染',shadow:c=>R==='sang'&&c.c==='シャドウ',tb:c=>R==='sang'&&c.c==='血の穢れ',skill:c=>R==='neo'&&c.c==='スキル',
     qh:c=>c.c==='クイーンの体力'&&c.s0===E,xy:c=>S.xy&&c.c==='ジリアン'&&!['アイテム','ヘルプ'].includes(c.s0)};
