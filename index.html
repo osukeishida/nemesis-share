@@ -3470,6 +3470,24 @@ section.panel {
 .exint {
   color: #2e9d4a;
 }
+.xyt td {
+  vertical-align: middle;
+}
+.xyt td:first-child {
+  min-width: 112px;
+}
+.xyt img.xyb {
+  display: block;
+  width: 46px;
+  border-radius: 4px;
+  margin-bottom: 4px;
+}
+.xyh {
+  margin-top: 10px;
+}
+.xyt th {
+  white-space: nowrap;
+}
 </style>
 
 <div class="wrap">
@@ -7750,26 +7768,42 @@ function setupLists() {
   });
   if (S.xy)
     L.push({
-      h: 'ジリアン（メインのセットアップ後、プレイヤーのセットアップ前）',
+      h: 'ジリアン（基本の準備のあと、プレイヤーの準備の前に）',
       e: 'Xyrians',
+      lead:
+        '<b>ジリアンは最初は盤面にいません。</b>準備するのは「山に混ぜるカード」と「横に置いておく物」だけです。登場は、ゲーム中にジリアン探査カードを引いてから（下の「このあと」）。' +
+        XYSORT(),
       items: [
-        CL(
-          'x1',
-          'ジリアン探査カード3枚を探査の山に、ジリアンイベントカード3枚（新たな指令／奴隷狩り／クイーンの追跡）から<b>ランダムに1枚</b>をイベントの山に混ぜる。<b>どちらも一番上がジリアンのカードでないこと</b>を確認。残りのジリアンイベントカードは箱へ。'
-        ),
+        CL('x1', '<b>探査の山</b>に、ジリアン探査カードを<b>3枚全部</b>混ぜる。'),
         CL(
           'x2',
-          'ジリアンフェイズカードをイベントの山の横に表向きで置く（イベントの山の上に置いて目印にしてもよい）。'
+          '<b>イベントの山</b>に、ジリアンイベントカード3枚（新たな指令／奴隷狩り／クイーンの追跡）から<b>ランダムに1枚だけ</b>混ぜる。残りの2枚は箱へ。'
         ),
-        CL('x3', 'ジリアンヘルプカードを全員が見える場所へ。'),
+        CL(
+          'x3',
+          '探査の山・イベントの山の<b>一番上がジリアンのカードでない</b>ことを確認（ジリアンのカードは裏面の柄が違うので見分けられる）。一番上にあれば混ぜ直す。'
+        ),
         CL(
           'x4',
-          'ジリアン行動の山→攻撃の山の隣、ジリアンアイテムの山→アイテムの山の隣、ジリアンステータスの山→重傷の山の隣（すべてシャッフルして伏せる）。'
+          'ジリアン専用の山を3つ作る（それぞれシャッフルして伏せる）：<ul><li><b>行動の山</b> → イントルーダーの攻撃の山の隣</li><li><b>アイテムの山</b> → アイテムの山の隣</li><li><b>ステータスの山</b> → 重傷の山の隣</li></ul>'
         ),
-        CL('x5', '忠誠カードを「利用可能（Available）」面でマップの近くへ。両面とも誰でも読んでよい。'),
-        CL('x6', '痕跡トークン3個、負傷トークン3個、ジリアンのモデル3体、忠誠トークン1個をマップの横へ。'),
-        CL('x7', 'ジリアントークンをイントルーダー袋の<b>横</b>に置く（まだ入れない）。')
-      ]
+        CL(
+          'x5',
+          '<b>ジリアンフェイズカード</b>をイベントの山の横に表向きで置く。毎ラウンド、イベントカードを引く前にこれを解決する（目印として山の上に置いてもよい）。'
+        ),
+        CL('x6', '<b>ジリアンヘルプカード</b>を全員から見える場所に置く。'),
+        CL(
+          'x7',
+          '<b>忠誠カード</b>を「Available（利用可能）」の面を上にして近くに置く（両面とも誰でも読んでよい）。'
+        ),
+        CL(
+          'x8',
+          'マップの横に置いておく：<b>痕跡トークン3個・負傷トークン3個・ジリアンのモデル3体・忠誠トークン1個</b>。'
+        ),
+        CL('x9', '<b>ジリアントークン</b>を袋の<b>横</b>に置く（<b>まだ袋に入れない</b>）。')
+      ],
+      after:
+        '<p class="note"><b>このあと（ゲーム中）：</b>ジリアン探査カードを引く → カードの指示どおり<b>痕跡トークン</b>を置き、ジリアントークンを<b>袋に入れる</b> → 袋からジリアントークンが引かれたら、<b>痕跡トークンをジリアンのモデルに置き換えて登場</b>。</p>'
     });
   if (S.ins)
     L.push({
@@ -7855,6 +7889,48 @@ function setupLists() {
   });
   return L;
 }
+const XYSORT = () => {
+  const im = k => (ZKB[k] ? `<img class="xyb" src="${ZKB[k]}" alt="" loading="lazy">` : '');
+  const row = (img, back, n, where) => `<tr><td>${img}<b>${back}</b></td><td>${n}</td><td>${where}</td></tr>`;
+  return `<h3 class="xyh">仕分け表（ジリアンの箱の中身）</h3><div class="tbl"><table class="xyt"><tr><th>見分け方</th><th>枚数</th><th>どこへ</th></tr>${[
+    row(im('xyrian_exploration'), '裏：EXPLORATION<br>XYRIAN', '3', '<b>3枚全部</b>を探査の山に混ぜる'),
+    row(
+      im('xyrian_event'),
+      '裏：EVENT<br>XYRIAN',
+      '3',
+      '<b>ランダムに1枚だけ</b>イベントの山に混ぜる。残り2枚は箱へ'
+    ),
+    row(
+      im('xyrian_activation'),
+      '裏：ACTIVATION<br>XYRIAN',
+      '10',
+      'シャッフルして伏せ、<b>イントルーダーの攻撃の山の隣</b>へ（ジリアン行動の山）'
+    ),
+    row(
+      '',
+      'ジリアンのアイテム<br><small>表：戦闘技術・生命維持技術・ステルス技術</small>',
+      '3',
+      'シャッフルして伏せ、<b>アイテムの山の隣</b>へ'
+    ),
+    row(
+      '',
+      'ジリアンのステータス<br><small>表：捕縛・毒物汚染・標的の刻印</small>',
+      '3',
+      'シャッフルして伏せ、<b>重傷の山の隣</b>へ'
+    ),
+    row('', '表：XYRIAN PHASE<br><small>ジリアンフェイズ</small>', '1', '<b>イベントの山の横</b>に表向き'),
+    row('', '表：XYRIAN HELP<br><small>ジリアンヘルプ</small>', '1', '全員から見える所に表向き'),
+    row('', 'ALLEGIANCE<br><small>忠誠カード</small>', '1', '<b>「Available」の面を上</b>にして近くへ'),
+    row(
+      '',
+      'トークン・モデル',
+      '—',
+      '痕跡3・負傷3・ジリアン3体・忠誠トークン1は<b>マップの横</b>。<b>ジリアントークン1は袋の横</b>（まだ入れない）'
+    )
+  ].join(
+    ''
+  )}</table></div><p class="note">ジリアンのカードは裏面の柄が普通のカードと違うので、山に混ぜても見分けがつきます（そういう作り）。アイテム・ステータスのカードの裏面は表の名前で見分けてください。</p>`;
+};
 function renderSetup() {
   segs();
   const bd = bagDef();
@@ -7911,7 +7987,7 @@ function renderSetup() {
         (g.e === 'Player setup'
           ? `<div class="card"><div class="eyebrow">For the teacher</div><h2>説明役の人だけ</h2><label class="tog"><input type="checkbox" id="sTeach" ${S.teach ? 'checked' : ''}>インスト台本を「はじめに」に表示</label><p class="note" style="margin:6px 0 0">初めての人に説明する人向けの台本（話す順番・言うこと・あとに回すこと）。オフのときは、初めての人向けの画面には出ません。</p></div>`
           : '') +
-        `<div class="card"><div class="eyebrow">${g.e}</div><h2>${g.h}</h2><ul class="cl">${g.items.map(i => `<li class="${S.checks[i.id] ? 'done' : ''}"><label class="clab"><input type="checkbox" id="ck-${i.id}" ${S.checks[i.id] ? 'checked' : ''} aria-label="完了"><span>${i.tag ? `<span class="tag">${i.tag}</span>` : ''}${i.txt}</span></label></li>`).join('')}</ul></div>`
+        `<div class="card"><div class="eyebrow">${g.e}</div><h2>${g.h}</h2>${g.lead ? `<p class="note">${g.lead}</p>` : ''}<ul class="cl">${g.items.map(i => `<li class="${S.checks[i.id] ? 'done' : ''}"><label class="clab"><input type="checkbox" id="ck-${i.id}" ${S.checks[i.id] ? 'checked' : ''} aria-label="完了"><span>${i.tag ? `<span class="tag">${i.tag}</span>` : ''}${i.txt}</span></label></li>`).join('')}</ul>${g.after || ''}</div>`
     )
     .join('');
   {
